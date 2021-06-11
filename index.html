@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>MS Teams Configuration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://statics.teams.microsoft.com/sdk/v1.2/js/MicrosoftTeams.min.js"></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@16/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"
+    ></script>
+    <script src="https://unpkg.com/react-copy-to-clipboard/build/react-copy-to-clipboard.js"></script>
+    <style>
+      body {
+        font-family: 'segoeui-regular', 'wf_segoe-ui_normal', 'Segoe UI',
+          'Segoe WP', Tahoma, Arial, sans-serif;
+      }
+      div.semilight_small_configuration_text {
+        font-size: 14px;
+        font-weight: 400;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="semilight_small_configuration_text"></div>
+    <script type="text/javascript">
+      class WebHook extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = { copied: false, value: '' };
+        }
+        render() {
+          const styles = {
+            webhook: {
+              display: 'flex',
+              'padding-right': '390px',
+              'justify-content': 'space-between',
+            },
+            input: {
+              background: '#EEEEEE',
+              width: '280px',
+              height: '26px',
+              'font-family': 'segoeui-regular',
+              'font-size': '14px',
+            },
+            button: {},
+          };
+          return React.createElement('div', { style: styles.webhook }, [
+            React.createElement(
+              'div',
+              null,
+              React.createElement('input', {
+                value: this.props.url,
+                disabled: true,
+                style: styles.input,
+              }),
+            ),
+            React.createElement(
+              'div',
+              null,
+              React.createElement(
+                CopyToClipboard,
+                { text: this.props.url },
+                React.createElement(
+                  'button',
+                  { style: styles.button },
+                  React.createElement('img', {
+                    src:
+                      'https://outlook.office.com/connectors/Content/Images/icon-copy.png',
+                  }),
+                ),
+              ),
+            ),
+          ]);
+        }
+      }
+      microsoftTeams.initialize();
+      microsoftTeams.settings.getSettings(function(settings) {
+        const domContainer = document.querySelector('#root');
+        ReactDOM.render(
+          React.createElement(WebHook, { url: settings.webhookUrl }),
+          domContainer,
+        );
+      });
+      microsoftTeams.settings.setSettings({
+        entityId: 'teams',
+        contentUrl: 'jhrdina-tf.github.io/webhook-test',
+        configName: 'WebhookTest',
+      });
+      microsoftTeams.settings.setValidityState(true);
+      microsoftTeams.settings.registerOnSaveHandler(function(saveEvent) {
+        saveEvent.notifySuccess();
+        microsoftTeams.settings.getSettings(function(settings) {
+          const domContainer = document.querySelector('#root');
+          ReactDOM.render(
+            React.createElement(WebHook, { url: settings.webhookUrl }),
+            domContainer,
+          );
+        });
+      });
+      microsoftTeams.settings.registerOnRemoveHandler(function(removeEvent) {
+        var removeCalled = true;
+      });
+    </script>
+  </body>
+</html>
